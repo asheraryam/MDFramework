@@ -247,10 +247,10 @@ namespace MD
             {
                 Members = new List<MemberInfo>();
                 DataConverters = new List<IMDDataConverter>();
-                List<MemberInfo> MemberInfos = typeof(T).GetMemberInfos();
+                IList<MemberInfo> MemberInfos = typeof(T).GetMemberInfos();
                 foreach (MemberInfo Member in MemberInfos)
                 {
-                    MDReplicated RepAttribute = Member.GetCustomAttribute(typeof(MDReplicated)) as MDReplicated;
+                    MDReplicated RepAttribute = MDReflectionCache.GetCustomAttribute<MDReplicated>(Member) as MDReplicated;
                     if (RepAttribute == null)
                     {
                         continue;
@@ -345,10 +345,12 @@ namespace MD
             ExtractMembers();
             if (LastValues.Count == 0 && CurrentValue != null)
             {
+                MDLog.Trace(LOG_CAT, "We haven't ever replicated");
                 return true;
             } 
-            else if (CurrentValue != LastValue)
+            else if (Equals(CurrentValue, LastValue) == false)
             {
+                MDLog.Trace(LOG_CAT, "The values are different");
                 return true;
             }
             else if (LastValue == null && CurrentValue == null)
